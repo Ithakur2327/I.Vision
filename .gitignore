@@ -1,0 +1,39 @@
+# --- Environment variables (never commit secrets) ---
+.env
+.env.local
+.env.*.local
+backend/.env
+frontend/.env.local
+
+# --- Node / Next.js (frontend) ---
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/.turbo/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# --- Python (backend) ---
+backend/venv/
+backend/__pycache__/
+backend/**/__pycache__/
+backend/*.pyc
+backend/.pytest_cache/
+backend/*.egg-info/
+
+# --- Uploaded files (user data, don't commit) ---
+backend/uploads/
+backend/app/uploads/
+
+# --- OS / editor junk ---
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+
+# --- Docker (local volumes if ever created outside compose) ---
+postgres_data/
+qdrant_data/

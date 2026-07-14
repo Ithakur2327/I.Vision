@@ -1,0 +1,49 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ivision
+      POSTGRES_PASSWORD: ivision
+      POSTGRES_DB: ivision
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  qdrant:
+    image: qdrant/qdrant:latest
+    ports:
+      - "6333:6333"
+    volumes:
+      - qdrant_data:/qdrant/storage
+
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres
+      - qdrant
+    environment:
+      DATABASE_URL: postgresql://ivision:ivision@postgres:5432/ivision
+      QDRANT_URL: http://qdrant:6333
+      GROQ_API_KEY: ${GROQ_API_KEY:-}
+      JWT_SECRET: ${JWT_SECRET:-change-me-in-production}
+    volumes:
+      - uploads_data:/app/uploads
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:8000
+
+volumes:
+  postgres_data:
+  qdrant_data:
+  uploads_data:
