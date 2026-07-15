@@ -1,6 +1,7 @@
 "use client";
 
-import { PanelLeft, Library, Plus } from "lucide-react";
+import { PanelLeft, Library, SquarePen } from "lucide-react";
+import { ProfileMenu } from "@/components/ProfileMenu";
 
 export function LeftRail({
   historyOpen,
@@ -17,26 +18,46 @@ export function LeftRail({
 }) {
   return (
     <nav
-      className="fixed left-3 top-1/2 z-40 flex -translate-y-1/2 flex-col items-center gap-2 rounded-full border border-white/10 bg-[#0c0e10]/80 py-4 px-2 backdrop-blur-xl sm:left-4"
+      className="fixed left-3 top-4 bottom-4 z-40 flex w-14 flex-col items-center rounded-[26px] border border-white/10 bg-[#0c0e10]/80 py-4 backdrop-blur-xl sm:left-4"
       aria-label="Primary"
     >
-      <RailButton
-        active={historyOpen}
-        label="Chat history"
-        onClick={onToggleHistory}
-      >
-        <PanelLeft className="h-[18px] w-[18px]" />
-      </RailButton>
+      {/* brand mark — distinct wordmark badge, not the orb */}
+      <div className="mb-4 flex items-center justify-center">
+        <div
+          className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/10 bg-gradient-to-br from-emerald-400/25 via-emerald-500/10 to-transparent shadow-[0_0_18px_rgba(20,214,170,0.25)]"
+          aria-label="i.vision"
+          title="i.vision"
+        >
+          <span className="bg-gradient-to-br from-emerald-200 to-emerald-500 bg-clip-text text-[15px] font-bold leading-none text-transparent">
+            i.
+          </span>
+        </div>
+      </div>
 
-      <RailButton label="New chat" onClick={onNewChat}>
-        <Plus className="h-[18px] w-[18px]" />
-      </RailButton>
+      <div className="flex flex-col items-center gap-2">
+        <RailButton
+          active={historyOpen}
+          label="Chat history"
+          onClick={onToggleHistory}
+        >
+          <PanelLeft className="h-[18px] w-[18px]" />
+        </RailButton>
 
-      <div className="my-1 h-px w-6 bg-white/10" />
+        <RailButton label="New chat" onClick={onNewChat}>
+          <SquarePen className="h-[18px] w-[18px]" />
+        </RailButton>
 
-      <RailButton active={libraryOpen} label="Library" onClick={onToggleLibrary}>
-        <Library className="h-[18px] w-[18px]" />
-      </RailButton>
+        <div className="my-1 h-px w-6 bg-white/10" />
+
+        <RailButton active={libraryOpen} label="Library" onClick={onToggleLibrary}>
+          <Library className="h-[18px] w-[18px]" />
+        </RailButton>
+      </div>
+
+      {/* spacer pushes profile to the bottom of the rail */}
+      <div className="flex-1" />
+
+      <ProfileMenu variant="rail" />
     </nav>
   );
 }

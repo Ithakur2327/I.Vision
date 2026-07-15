@@ -6,7 +6,6 @@ import { ChatWorkspace } from "@/components/ChatWorkspace";
 import { LeftRail } from "@/components/LeftRail";
 import { ChatHistoryDrawer } from "@/components/ChatHistoryDrawer";
 import { LibraryPanel } from "@/components/LibraryPanel";
-import { ProfileMenu } from "@/components/ProfileMenu";
 import { api, getStoredToken } from "@/lib/api";
 
 export default function WorkspacePage() {
@@ -76,12 +75,10 @@ export default function WorkspacePage() {
         open={historyOpen}
         onClose={() => setHistoryOpen(false)}
         activeChatId={chatId}
-        onSelectChat={setChatId}
+        onSelectChat={(id) => setChatId(id || null)}
       />
 
       <LibraryPanel open={libraryOpen} onClose={() => setLibraryOpen(false)} />
-
-      <ProfileMenu />
 
       <main className="relative flex h-full flex-col pl-20 pr-2 sm:pl-24">
         <ChatWorkspace chatId={chatId} ensureChat={ensureChat} />

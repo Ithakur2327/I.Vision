@@ -70,6 +70,7 @@ export const api = {
   createChat: (title?: string) =>
     request("/api/chats", { method: "POST", body: JSON.stringify({ title }) }),
   getMessages: (chatId: string) => request(`/api/chats/${chatId}/messages`),
+  deleteChat: (chatId: string) => request(`/api/chats/${chatId}`, { method: "DELETE" }),
   sendMessage: (chatId: string, content: string) =>
     request(`/api/chats/${chatId}/messages`, {
       method: "POST",

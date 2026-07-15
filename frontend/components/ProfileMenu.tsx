@@ -6,7 +6,13 @@ import { AnimatePresence, motion } from "framer-motion";
 import { LogOut } from "lucide-react";
 import { api, clearToken } from "@/lib/api";
 
-export function ProfileMenu() {
+export function ProfileMenu({
+  variant = "floating"
+}: {
+  /** "floating": original fixed top-right badge. "rail": sits inline at the
+   * bottom of the sidebar and pops its menu upward/to the side instead. */
+  variant?: "floating" | "rail";
+}) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [profile, setProfile] = useState<{ email: string; full_name?: string | null } | null>(
@@ -33,8 +39,13 @@ export function ProfileMenu() {
 
   const initial = (profile?.full_name || profile?.email || "?").charAt(0).toUpperCase();
 
+  const isRail = variant === "rail";
+
   return (
-    <div ref={ref} className="fixed right-4 top-4 z-40">
+    <div
+      ref={ref}
+      className={isRail ? "relative flex items-center justify-center" : "fixed right-4 top-4 z-40"}
+    >
       <button
         onClick={() => setOpen((v) => !v)}
         aria-label="Profile"
@@ -46,11 +57,15 @@ export function ProfileMenu() {
       <AnimatePresence>
         {open && (
           <motion.div
-            initial={{ opacity: 0, y: -8, scale: 0.97 }}
+            initial={{ opacity: 0, y: isRail ? 8 : -8, scale: 0.97 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -8, scale: 0.97 }}
+            exit={{ opacity: 0, y: isRail ? 8 : -8, scale: 0.97 }}
             transition={{ duration: 0.15 }}
-            className="absolute right-0 mt-2 w-56 overflow-hidden rounded-2xl border border-white/10 bg-[#0c0e10]/95 p-1.5 shadow-2xl backdrop-blur-2xl"
+            className={
+              isRail
+                ? "absolute bottom-0 left-full ml-3 w-56 overflow-hidden rounded-2xl border border-white/10 bg-[#0c0e10]/95 p-1.5 shadow-2xl backdrop-blur-2xl"
+                : "absolute right-0 mt-2 w-56 overflow-hidden rounded-2xl border border-white/10 bg-[#0c0e10]/95 p-1.5 shadow-2xl backdrop-blur-2xl"
+            }
           >
             <div className="px-3 py-2.5">
               <p className="truncate text-sm text-white/90">

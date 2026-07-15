@@ -91,18 +91,18 @@ export function ChatWorkspace({
   return (
     <LayoutGroup>
       <div className="space-bg relative flex h-full flex-1 flex-col overflow-hidden rounded-[32px] border border-white/[0.06]">
-        {/* orb — docks from big centered hero into a small pinned header once the chat is active */}
+        {/* orb — docks from a big centered hero into a small pinned top-right badge once the chat is active */}
         <motion.div
           layout
-          transition={{ type: "spring", stiffness: 210, damping: 26 }}
+          transition={{ type: "spring", stiffness: 220, damping: 24 }}
           className={
             active
-              ? "flex shrink-0 items-center justify-center pt-6"
+              ? "absolute right-4 top-4 z-30 sm:right-6 sm:top-6"
               : "flex flex-1 items-center justify-center"
           }
         >
-          <motion.div layout transition={{ type: "spring", stiffness: 210, damping: 26 }}>
-            <Orb size={active ? 64 : 240} pulse={pulsing} />
+          <motion.div layout transition={{ type: "spring", stiffness: 220, damping: 24 }}>
+            <Orb size={active ? 56 : 240} pulse={pulsing} />
           </motion.div>
         </motion.div>
 
