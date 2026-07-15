@@ -1,4 +1,11 @@
 import os
+from pathlib import Path
+from dotenv import load_dotenv
+
+# Load backend/.env explicitly. Without this, env vars are only picked up
+# when Docker Compose injects them directly — running via `uvicorn` locally
+# (no Docker) would silently fall back to the Docker-only defaults below.
+load_dotenv(Path(__file__).resolve().parent.parent.parent / ".env")
 
 
 class Settings:

@@ -19,6 +19,15 @@ class TokenResponse(BaseModel):
     token_type: str = "bearer"
 
 
+class UserOut(BaseModel):
+    id: str
+    email: EmailStr
+    full_name: Optional[str] = None
+
+    class Config:
+        from_attributes = True
+
+
 class ChatCreate(BaseModel):
     title: Optional[str] = "New Chat"
 

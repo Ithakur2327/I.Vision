@@ -1,43 +1,90 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Sidebar } from "@/components/Sidebar";
+import { useRouter } from "next/navigation";
 import { ChatWorkspace } from "@/components/ChatWorkspace";
-import { KnowledgeView } from "@/components/KnowledgeView";
-import { IntegrationView } from "@/components/IntegrationView";
-import { SettingsView } from "@/components/SettingsView";
-import { api } from "@/lib/api";
+import { LeftRail } from "@/components/LeftRail";
+import { ChatHistoryDrawer } from "@/components/ChatHistoryDrawer";
+import { LibraryPanel } from "@/components/LibraryPanel";
+import { ProfileMenu } from "@/components/ProfileMenu";
+import { api, getStoredToken } from "@/lib/api";
 
 export default function WorkspacePage() {
-  const [active, setActive] = useState("chats");
+  const router = useRouter();
+  const [checkingAuth, setCheckingAuth] = useState(true);
   const [chatId, setChatId] = useState<string | null>(null);
+  const [historyOpen, setHistoryOpen] = useState(false);
+  const [libraryOpen, setLibraryOpen] = useState(false);
 
-  async function handleNewChat() {
-    try {
-      const chat = await api.createChat("New Chat");
-      setChatId(chat.id);
-      setActive("chats");
-    } catch {
-      // Not authenticated yet — chat creation requires a logged-in user.
+  useEffect(() => {
+    if (!getStoredToken()) {
+      router.replace("/login");
+      return;
     }
+    // Verify the token is still valid against the backend, not just present.
+    api
+      .me()
+      .then(() => setCheckingAuth(false))
+      .catch(() => router.replace("/login"));
+  }, [router]);
+
+  async function ensureChat(): Promise<string> {
+    const chat = await api.createChat("New Chat");
+    setChatId(chat.id);
+    return chat.id;
+  }
+
+  function handleNewChat() {
+    setChatId(null);
+    setHistoryOpen(false);
+  }
+
+  if (checkingAuth) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center bg-background">
+        <div className="h-6 w-6 animate-spin rounded-full border-2 border-white/20 border-t-emerald-300" />
+      </div>
+    );
   }
 
   return (
-    <div className="flex h-screen bg-background">
-      <Sidebar active={active} onSelect={setActive} onNewChat={handleNewChat} />
+    <div className="relative h-screen w-full overflow-hidden bg-background">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0"
+        style={{
+          background:
+            "radial-gradient(50% 40% at 50% 0%, rgba(20,214,170,0.06) 0%, rgba(8,9,11,0) 60%)"
+        }}
+      />
 
-      <main className="flex flex-1 flex-col overflow-hidden">
-        {active === "chats" && <ChatWorkspace chatId={chatId} />}
-        {(active === "knowledge" || active === "documents") && <KnowledgeView />}
-        {["github", "youtube", "websites", "leetcode"].includes(active) && (
-          <IntegrationView view={active} />
-        )}
-        {active === "projects" && (
-          <div className="flex h-full flex-1 items-center justify-center text-white/40">
-            Projects — coming in the next iteration.
-          </div>
-        )}
-        {active === "settings" && <SettingsView />}
+      <LeftRail
+        historyOpen={historyOpen}
+        onToggleHistory={() => {
+          setHistoryOpen((v) => !v);
+          setLibraryOpen(false);
+        }}
+        libraryOpen={libraryOpen}
+        onToggleLibrary={() => {
+          setLibraryOpen((v) => !v);
+          setHistoryOpen(false);
+        }}
+        onNewChat={handleNewChat}
+      />
+
+      <ChatHistoryDrawer
+        open={historyOpen}
+        onClose={() => setHistoryOpen(false)}
+        activeChatId={chatId}
+        onSelectChat={setChatId}
+      />
+
+      <LibraryPanel open={libraryOpen} onClose={() => setLibraryOpen(false)} />
+
+      <ProfileMenu />
+
+      <main className="relative flex h-full flex-col pl-20 pr-2 sm:pl-24">
+        <ChatWorkspace chatId={chatId} ensureChat={ensureChat} />
       </main>
     </div>
   );

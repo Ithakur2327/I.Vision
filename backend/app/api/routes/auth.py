@@ -3,8 +3,13 @@ from sqlalchemy.orm import Session
 
 from app.db.session import get_db
 from app.models.models import User, UserSettings
-from app.schemas.schemas import UserCreate, UserLogin, TokenResponse
-from app.core.security import hash_password, verify_password, create_access_token
+from app.schemas.schemas import UserCreate, UserLogin, TokenResponse, UserOut
+from app.core.security import (
+    hash_password,
+    verify_password,
+    create_access_token,
+    get_current_user_id,
+)
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 
@@ -38,3 +43,11 @@ def login(payload: UserLogin, db: Session = Depends(get_db)):
         )
     token = create_access_token(user.id)
     return TokenResponse(access_token=token)
+
+
+@router.get("/me", response_model=UserOut)
+def me(user_id: str = Depends(get_current_user_id), db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    return user

@@ -24,7 +24,28 @@ NOT_CONFIGURED = (
 )
 
 
-@router.post("/github")
+@router.get("/github")
+def list_github_repos(user_id: str = Depends(get_current_user_id), db: Session = Depends(get_db)):
+    rows = db.query(GitHubRepository).filter(GitHubRepository.owner_id == user_id).order_by(GitHubRepository.created_at.desc()).all()
+    return [{"id": r.id, "url": r.repo_url, "status": r.status} for r in rows]
+
+
+@router.get("/youtube")
+def list_youtube_sources(user_id: str = Depends(get_current_user_id), db: Session = Depends(get_db)):
+    rows = db.query(YouTubeSource).filter(YouTubeSource.owner_id == user_id).order_by(YouTubeSource.created_at.desc()).all()
+    return [{"id": r.id, "url": r.url, "status": r.status} for r in rows]
+
+
+@router.get("/website")
+def list_website_sources(user_id: str = Depends(get_current_user_id), db: Session = Depends(get_db)):
+    rows = db.query(WebsiteSource).filter(WebsiteSource.owner_id == user_id).order_by(WebsiteSource.created_at.desc()).all()
+    return [{"id": r.id, "url": r.url, "status": r.status} for r in rows]
+
+
+@router.get("/leetcode")
+def list_leetcode_profiles(user_id: str = Depends(get_current_user_id), db: Session = Depends(get_db)):
+    rows = db.query(LeetCodeProfile).filter(LeetCodeProfile.owner_id == user_id).order_by(LeetCodeProfile.created_at.desc()).all()
+    return [{"id": r.id, "username": r.username, "status": r.status} for r in rows]
 def add_github_repo(
     payload: UrlPayload,
     user_id: str = Depends(get_current_user_id),

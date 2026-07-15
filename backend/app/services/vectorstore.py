@@ -1,6 +1,14 @@
 import uuid
 from qdrant_client import QdrantClient
-from qdrant_client.models import Distance, VectorParams, PointStruct, Filter, FieldCondition, MatchValue
+from qdrant_client.models import (
+    Distance,
+    VectorParams,
+    PointStruct,
+    Filter,
+    FieldCondition,
+    MatchValue,
+    PayloadSchemaType,
+)
 
 from app.core.config import settings
 
@@ -20,6 +28,16 @@ def ensure_collection():
             vectors_config=VectorParams(
                 size=settings.EMBEDDING_DIM, distance=Distance.COSINE
             ),
+        )
+    # Qdrant requires an explicit payload index on any field used in a
+    # query_filter. Without these, filtered search/delete calls fail with
+    # "Index required but not found for ...". Creating an index that
+    # already exists is a harmless no-op, so this is safe to call every time.
+    for field in ("owner_id", "source_id"):
+        _client.create_payload_index(
+            collection_name=COLLECTION,
+            field_name=field,
+            field_schema=PayloadSchemaType.KEYWORD,
         )
 
 

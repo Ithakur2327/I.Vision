@@ -5,8 +5,16 @@ function getToken(): string | null {
   return window.localStorage.getItem("ivision_token");
 }
 
+export function getStoredToken(): string | null {
+  return getToken();
+}
+
 export function setToken(token: string) {
   window.localStorage.setItem("ivision_token", token);
+}
+
+export function clearToken() {
+  window.localStorage.removeItem("ivision_token");
 }
 
 async function request(path: string, options: RequestInit = {}) {
@@ -28,17 +36,36 @@ async function request(path: string, options: RequestInit = {}) {
   return res.json();
 }
 
+export interface TokenResponse {
+  access_token: string;
+  token_type?: string;
+}
+
 export const api = {
-  register: (email: string, password: string, full_name?: string) =>
+  register: (email: string, password: string, full_name?: string): Promise<TokenResponse> =>
     request("/api/auth/register", {
       method: "POST",
       body: JSON.stringify({ email, password, full_name })
     }),
-  login: (email: string, password: string) =>
+  login: (email: string, password: string): Promise<TokenResponse> =>
     request("/api/auth/login", {
       method: "POST",
       body: JSON.stringify({ email, password })
     }),
+  me: (): Promise<{ id: string; email: string; full_name?: string | null }> =>
+    request("/api/auth/me"),
+  addGithub: (url: string) =>
+    request("/api/integrations/github", { method: "POST", body: JSON.stringify({ url }) }),
+  addYoutube: (url: string) =>
+    request("/api/integrations/youtube", { method: "POST", body: JSON.stringify({ url }) }),
+  addWebsite: (url: string) =>
+    request("/api/integrations/website", { method: "POST", body: JSON.stringify({ url }) }),
+  addLeetcode: (username: string) =>
+    request("/api/integrations/leetcode", { method: "POST", body: JSON.stringify({ username }) }),
+  listGithub: () => request("/api/integrations/github"),
+  listYoutube: () => request("/api/integrations/youtube"),
+  listWebsite: () => request("/api/integrations/website"),
+  listLeetcode: () => request("/api/integrations/leetcode"),
   listChats: () => request("/api/chats"),
   createChat: (title?: string) =>
     request("/api/chats", { method: "POST", body: JSON.stringify({ title }) }),
