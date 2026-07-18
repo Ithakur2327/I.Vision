@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
 import { ArrowUp, Copy, RefreshCw, Loader2 } from "lucide-react";
 import { api } from "@/lib/api";
-import { Orb } from "@/components/Orb";
+import { Orb3D } from "@/components/Orb3D";
 
 type ChatMessage = {
   id: string;
@@ -28,7 +28,11 @@ export function ChatWorkspace({
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const active = messages.length > 0 || !!chatId;
-  const pulsing = loading || (focused && input.trim().length > 0);
+  const orbState = loading
+    ? "responding"
+    : focused && input.trim().length > 0
+    ? "typing"
+    : "idle";
 
   useEffect(() => {
     if (!chatId) {
@@ -102,7 +106,7 @@ export function ChatWorkspace({
           }
         >
           <motion.div layout transition={{ type: "spring", stiffness: 220, damping: 24 }}>
-            <Orb size={active ? 56 : 240} pulse={pulsing} />
+            <Orb3D size={active ? 56 : 240} state={orbState} />
           </motion.div>
         </motion.div>
 

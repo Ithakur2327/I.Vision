@@ -4,14 +4,14 @@
 
 html,
 body {
-  background: #08090b;
+  background: #171717;
   color: #f2f2f0;
   height: 100%;
 }
 
 ::selection {
-  background: #ff4d2e;
-  color: #08090b;
+  background: #21f1a8;
+  color: #171717;
 }
 
 .hero-glow {

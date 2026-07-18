@@ -2,6 +2,7 @@
 
 import { PanelLeft, Library, SquarePen } from "lucide-react";
 import { ProfileMenu } from "@/components/ProfileMenu";
+import { Logo } from "@/components/Logo";
 
 export function LeftRail({
   historyOpen,
@@ -21,17 +22,9 @@ export function LeftRail({
       className="fixed left-3 top-4 bottom-4 z-40 flex w-14 flex-col items-center rounded-[26px] border border-white/10 bg-[#0c0e10]/80 py-4 backdrop-blur-xl sm:left-4"
       aria-label="Primary"
     >
-      {/* brand mark — distinct wordmark badge, not the orb */}
-      <div className="mb-4 flex items-center justify-center">
-        <div
-          className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/10 bg-gradient-to-br from-emerald-400/25 via-emerald-500/10 to-transparent shadow-[0_0_18px_rgba(20,214,170,0.25)]"
-          aria-label="i.vision"
-          title="i.vision"
-        >
-          <span className="bg-gradient-to-br from-emerald-200 to-emerald-500 bg-clip-text text-[15px] font-bold leading-none text-transparent">
-            i.
-          </span>
-        </div>
+      {/* brand mark */}
+      <div className="mb-4 flex items-center justify-center" title="i.vision">
+        <Logo size={34} />
       </div>
 
       <div className="flex flex-col items-center gap-2">
