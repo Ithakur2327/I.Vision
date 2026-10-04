@@ -43,7 +43,7 @@ class Chat(Base, TimestampMixin):
     __tablename__ = "chats"
 
     id = Column(UUID(as_uuid=False), primary_key=True, default=gen_uuid)
-    owner_id = Column(UUID(as_uuid=False), ForeignKey("users.id"), nullable=False)
+    owner_id = Column(UUID(as_uuid=False), ForeignKey("users.id"), nullable=False, index=True)
     title = Column(String, default="New Chat")
     is_pinned = Column(Boolean, default=False)
     status = Column(String, default="active")
@@ -59,7 +59,7 @@ class Message(Base, TimestampMixin):
     __tablename__ = "messages"
 
     id = Column(UUID(as_uuid=False), primary_key=True, default=gen_uuid)
-    chat_id = Column(UUID(as_uuid=False), ForeignKey("chats.id"), nullable=False)
+    chat_id = Column(UUID(as_uuid=False), ForeignKey("chats.id"), nullable=False, index=True)
     role = Column(String, nullable=False)  # user | assistant
     content = Column(Text, nullable=False)
     citations = Column(JSON, default=list)
@@ -72,7 +72,7 @@ class KnowledgeSource(Base, TimestampMixin):
     __tablename__ = "knowledge_sources"
 
     id = Column(UUID(as_uuid=False), primary_key=True, default=gen_uuid)
-    owner_id = Column(UUID(as_uuid=False), ForeignKey("users.id"), nullable=False)
+    owner_id = Column(UUID(as_uuid=False), ForeignKey("users.id"), nullable=False, index=True)
     type = Column(String, nullable=False)  # document | github | youtube | website | leetcode
     title = Column(String, nullable=False)
     tags = Column(JSON, default=list)
@@ -91,7 +91,7 @@ class Document(Base, TimestampMixin):
     __tablename__ = "documents"
 
     id = Column(UUID(as_uuid=False), primary_key=True, default=gen_uuid)
-    source_id = Column(UUID(as_uuid=False), ForeignKey("knowledge_sources.id"), nullable=False)
+    source_id = Column(UUID(as_uuid=False), ForeignKey("knowledge_sources.id"), nullable=False, index=True)
     file_name = Column(String, nullable=False)
     file_path = Column(String, nullable=False)
     file_type = Column(String, nullable=False)
@@ -105,17 +105,19 @@ class GitHubRepository(Base, TimestampMixin):
     __tablename__ = "github_repositories"
 
     id = Column(UUID(as_uuid=False), primary_key=True, default=gen_uuid)
-    owner_id = Column(UUID(as_uuid=False), ForeignKey("users.id"), nullable=False)
+    owner_id = Column(UUID(as_uuid=False), ForeignKey("users.id"), nullable=False, index=True)
+    source_id = Column(UUID(as_uuid=False), ForeignKey("knowledge_sources.id"), nullable=True, index=True)
     repo_url = Column(String, nullable=False)
     default_branch = Column(String, default="main")
     status = Column(String, default="pending")
+    error = Column(String, nullable=True)
 
 
 class Project(Base, TimestampMixin):
     __tablename__ = "projects"
 
     id = Column(UUID(as_uuid=False), primary_key=True, default=gen_uuid)
-    owner_id = Column(UUID(as_uuid=False), ForeignKey("users.id"), nullable=False)
+    owner_id = Column(UUID(as_uuid=False), ForeignKey("users.id"), nullable=False, index=True)
     name = Column(String, nullable=False)
     description = Column(Text, nullable=True)
     status = Column(String, default="active")
@@ -125,36 +127,42 @@ class WebsiteSource(Base, TimestampMixin):
     __tablename__ = "website_sources"
 
     id = Column(UUID(as_uuid=False), primary_key=True, default=gen_uuid)
-    owner_id = Column(UUID(as_uuid=False), ForeignKey("users.id"), nullable=False)
+    owner_id = Column(UUID(as_uuid=False), ForeignKey("users.id"), nullable=False, index=True)
+    source_id = Column(UUID(as_uuid=False), ForeignKey("knowledge_sources.id"), nullable=True, index=True)
     url = Column(String, nullable=False)
     status = Column(String, default="pending")
+    error = Column(String, nullable=True)
 
 
 class YouTubeSource(Base, TimestampMixin):
     __tablename__ = "youtube_sources"
 
     id = Column(UUID(as_uuid=False), primary_key=True, default=gen_uuid)
-    owner_id = Column(UUID(as_uuid=False), ForeignKey("users.id"), nullable=False)
+    owner_id = Column(UUID(as_uuid=False), ForeignKey("users.id"), nullable=False, index=True)
+    source_id = Column(UUID(as_uuid=False), ForeignKey("knowledge_sources.id"), nullable=True, index=True)
     url = Column(String, nullable=False)
     title = Column(String, nullable=True)
     status = Column(String, default="pending")
+    error = Column(String, nullable=True)
 
 
 class LeetCodeProfile(Base, TimestampMixin):
     __tablename__ = "leetcode_profiles"
 
     id = Column(UUID(as_uuid=False), primary_key=True, default=gen_uuid)
-    owner_id = Column(UUID(as_uuid=False), ForeignKey("users.id"), nullable=False)
+    owner_id = Column(UUID(as_uuid=False), ForeignKey("users.id"), nullable=False, index=True)
+    source_id = Column(UUID(as_uuid=False), ForeignKey("knowledge_sources.id"), nullable=True, index=True)
     username = Column(String, nullable=False)
     solved_data = Column(JSON, default=dict)
     status = Column(String, default="pending")
+    error = Column(String, nullable=True)
 
 
 class EmbeddingMetadata(Base, TimestampMixin):
     __tablename__ = "embeddings_metadata"
 
     id = Column(UUID(as_uuid=False), primary_key=True, default=gen_uuid)
-    source_id = Column(UUID(as_uuid=False), ForeignKey("knowledge_sources.id"), nullable=False)
+    source_id = Column(UUID(as_uuid=False), ForeignKey("knowledge_sources.id"), nullable=False, index=True)
     qdrant_point_id = Column(String, nullable=False)
     chunk_index = Column(Integer, nullable=False)
     chunk_text = Column(Text, nullable=False)
@@ -166,7 +174,7 @@ class Memory(Base, TimestampMixin):
     __tablename__ = "memory"
 
     id = Column(UUID(as_uuid=False), primary_key=True, default=gen_uuid)
-    owner_id = Column(UUID(as_uuid=False), ForeignKey("users.id"), nullable=False)
+    owner_id = Column(UUID(as_uuid=False), ForeignKey("users.id"), nullable=False, index=True)
     kind = Column(String, nullable=False)  # conversation | long_term | preference
     content = Column(Text, nullable=False)
 
@@ -187,6 +195,6 @@ class ActivityLog(Base, TimestampMixin):
     __tablename__ = "activity_logs"
 
     id = Column(UUID(as_uuid=False), primary_key=True, default=gen_uuid)
-    owner_id = Column(UUID(as_uuid=False), ForeignKey("users.id"), nullable=True)
+    owner_id = Column(UUID(as_uuid=False), ForeignKey("users.id"), nullable=True, index=True)
     event_type = Column(String, nullable=False)
     detail = Column(JSON, default=dict)

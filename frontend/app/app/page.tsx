@@ -6,6 +6,7 @@ import { ChatWorkspace } from "@/components/ChatWorkspace";
 import { LeftRail } from "@/components/LeftRail";
 import { ChatHistoryDrawer } from "@/components/ChatHistoryDrawer";
 import { LibraryPanel } from "@/components/LibraryPanel";
+import { SettingsModal } from "@/components/SettingsModal";
 import { api, getStoredToken } from "@/lib/api";
 
 export default function WorkspacePage() {
@@ -14,6 +15,9 @@ export default function WorkspacePage() {
   const [chatId, setChatId] = useState<string | null>(null);
   const [historyOpen, setHistoryOpen] = useState(false);
   const [libraryOpen, setLibraryOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [userName, setUserName] = useState<string | null>(null);
+  const [voiceEnabled, setVoiceEnabled] = useState(false);
 
   useEffect(() => {
     if (!getStoredToken()) {
@@ -23,8 +27,16 @@ export default function WorkspacePage() {
     // Verify the token is still valid against the backend, not just present.
     api
       .me()
-      .then(() => setCheckingAuth(false))
+      .then((profile) => {
+        setUserName(profile.full_name || profile.email || null);
+        setCheckingAuth(false);
+      })
       .catch(() => router.replace("/login"));
+
+    api
+      .getSettings()
+      .then((s) => setVoiceEnabled(s.voice_enabled))
+      .catch(() => setVoiceEnabled(false));
   }, [router]);
 
   async function ensureChat(): Promise<string> {
@@ -35,13 +47,19 @@ export default function WorkspacePage() {
 
   function handleNewChat() {
     setChatId(null);
+    closeOverlays();
+  }
+
+  function closeOverlays() {
     setHistoryOpen(false);
+    setLibraryOpen(false);
+    setSettingsOpen(false);
   }
 
   if (checkingAuth) {
     return (
       <div className="flex h-screen w-full items-center justify-center bg-background">
-        <div className="h-6 w-6 animate-spin rounded-full border-2 border-white/20 border-t-emerald-300" />
+        <div className="h-6 w-6 animate-spin rounded-full border-2 border-white/20 border-t-accent" />
       </div>
     );
   }
@@ -53,20 +71,43 @@ export default function WorkspacePage() {
         className="pointer-events-none absolute inset-0"
         style={{
           background:
-            "radial-gradient(50% 40% at 50% 0%, rgba(20,214,170,0.06) 0%, rgba(8,9,11,0) 60%)"
+            "radial-gradient(50% 40% at 50% 0%, rgba(0,235,225,0.06) 0%, rgba(2,3,4,0) 60%)"
         }}
       />
 
       <LeftRail
         historyOpen={historyOpen}
         onToggleHistory={() => {
-          setHistoryOpen((v) => !v);
-          setLibraryOpen(false);
+          setHistoryOpen((v) => {
+            const next = !v;
+            if (next) {
+              setLibraryOpen(false);
+              setSettingsOpen(false);
+            }
+            return next;
+          });
         }}
         libraryOpen={libraryOpen}
         onToggleLibrary={() => {
-          setLibraryOpen((v) => !v);
-          setHistoryOpen(false);
+          setLibraryOpen((v) => {
+            const next = !v;
+            if (next) {
+              setHistoryOpen(false);
+              setSettingsOpen(false);
+            }
+            return next;
+          });
+        }}
+        settingsOpen={settingsOpen}
+        onToggleSettings={() => {
+          setSettingsOpen((v) => {
+            const next = !v;
+            if (next) {
+              setHistoryOpen(false);
+              setLibraryOpen(false);
+            }
+            return next;
+          });
         }}
         onNewChat={handleNewChat}
       />
@@ -80,8 +121,15 @@ export default function WorkspacePage() {
 
       <LibraryPanel open={libraryOpen} onClose={() => setLibraryOpen(false)} />
 
+      <SettingsModal open={settingsOpen} onClose={() => setSettingsOpen(false)} />
+
       <main className="relative flex h-full flex-col pl-20 pr-2 sm:pl-24">
-        <ChatWorkspace chatId={chatId} ensureChat={ensureChat} />
+        <ChatWorkspace
+          chatId={chatId}
+          ensureChat={ensureChat}
+          userName={userName}
+          voiceEnabled={voiceEnabled}
+        />
       </main>
     </div>
   );

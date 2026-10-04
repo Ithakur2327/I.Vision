@@ -9,10 +9,11 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        background: "#171717",
+        background: "#020304",
         panel: "rgba(255,255,255,0.04)",
         panelBorder: "rgba(255,255,255,0.08)",
-        accent: "#21F1A8",
+        accent: "#00EBE1",
+        accentDim: "#0BA8A0",
         ember: "#FF4D2E",
         muted: "#9A9CA3",
         app: {

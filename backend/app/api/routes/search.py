@@ -1,6 +1,5 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-from sqlalchemy import or_
 
 from app.db.session import get_db
 from app.models.models import KnowledgeSource, Chat

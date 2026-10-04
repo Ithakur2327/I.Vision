@@ -72,3 +72,17 @@ class KnowledgeSourceOut(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class UserSettingsOut(BaseModel):
+    theme: str
+    ai_model: str
+    voice_enabled: bool
+
+    class Config:
+        from_attributes = True
+
+
+class UserSettingsUpdate(BaseModel):
+    theme: Optional[str] = None
+    voice_enabled: Optional[bool] = None

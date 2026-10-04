@@ -49,7 +49,7 @@ export function ProfileMenu({
       <button
         onClick={() => setOpen((v) => !v)}
         aria-label="Profile"
-        className="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-gradient-to-br from-emerald-400/30 to-teal-600/30 text-sm font-medium text-emerald-200 backdrop-blur-xl transition-transform hover:scale-105"
+        className="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-gradient-to-br from-accent/30 to-teal-600/30 text-sm font-medium text-accent backdrop-blur-xl transition-transform hover:scale-105"
       >
         {initial}
       </button>

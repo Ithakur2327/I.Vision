@@ -1,6 +1,6 @@
 "use client";
 
-import { PanelLeft, Library, SquarePen } from "lucide-react";
+import { Home, PanelLeft, Library, Settings } from "lucide-react";
 import { ProfileMenu } from "@/components/ProfileMenu";
 import { Logo } from "@/components/Logo";
 
@@ -9,12 +9,16 @@ export function LeftRail({
   onToggleHistory,
   libraryOpen,
   onToggleLibrary,
+  settingsOpen,
+  onToggleSettings,
   onNewChat
 }: {
   historyOpen: boolean;
   onToggleHistory: () => void;
   libraryOpen: boolean;
   onToggleLibrary: () => void;
+  settingsOpen: boolean;
+  onToggleSettings: () => void;
   onNewChat: () => void;
 }) {
   return (
@@ -23,21 +27,17 @@ export function LeftRail({
       aria-label="Primary"
     >
       {/* brand mark */}
-      <div className="mb-4 flex items-center justify-center" title="i.vision">
+      <div className="mb-5 flex items-center justify-center" title="i.vision">
         <Logo size={34} />
       </div>
 
       <div className="flex flex-col items-center gap-2">
-        <RailButton
-          active={historyOpen}
-          label="Chat history"
-          onClick={onToggleHistory}
-        >
-          <PanelLeft className="h-[18px] w-[18px]" />
+        <RailButton label="Home — start a new chat" onClick={onNewChat}>
+          <Home className="h-[18px] w-[18px]" />
         </RailButton>
 
-        <RailButton label="New chat" onClick={onNewChat}>
-          <SquarePen className="h-[18px] w-[18px]" />
+        <RailButton active={historyOpen} label="Chat history" onClick={onToggleHistory}>
+          <PanelLeft className="h-[18px] w-[18px]" />
         </RailButton>
 
         <div className="my-1 h-px w-6 bg-white/10" />
@@ -47,10 +47,16 @@ export function LeftRail({
         </RailButton>
       </div>
 
-      {/* spacer pushes profile to the bottom of the rail */}
+      {/* spacer pushes settings + profile to the bottom of the rail */}
       <div className="flex-1" />
 
-      <ProfileMenu variant="rail" />
+      <RailButton active={settingsOpen} label="Settings" onClick={onToggleSettings}>
+        <Settings className="h-[18px] w-[18px]" />
+      </RailButton>
+
+      <div className="mt-3">
+        <ProfileMenu variant="rail" />
+      </div>
     </nav>
   );
 }
@@ -73,7 +79,7 @@ function RailButton({
       title={label}
       className={`flex h-10 w-10 items-center justify-center rounded-full transition-colors ${
         active
-          ? "bg-emerald-400/15 text-emerald-300"
+          ? "bg-accent/15 text-accent"
           : "text-white/60 hover:bg-white/8 hover:text-white"
       }`}
     >

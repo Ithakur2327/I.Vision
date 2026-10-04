@@ -17,7 +17,7 @@ import {
 import { api } from "@/lib/api";
 
 type Doc = { id: string; type: string; title: string; status: string };
-type LinkItem = { id: string; status: string; url?: string; username?: string };
+type LinkItem = { id: string; status: string; url?: string; username?: string; error?: string | null };
 
 const SECTIONS = [
   { key: "documents", label: "Documents", icon: FileText },
@@ -74,7 +74,7 @@ export function LibraryPanel({ open, onClose }: { open: boolean; onClose: () => 
                     onClick={() => setSection(key)}
                     className={`flex shrink-0 items-center gap-2.5 rounded-xl px-3 py-2 text-sm transition-colors ${
                       section === key
-                        ? "bg-emerald-400/10 text-emerald-300"
+                        ? "bg-accent/10 text-accent"
                         : "text-white/60 hover:bg-white/5 hover:text-white/90"
                     }`}
                   >
@@ -89,36 +89,44 @@ export function LibraryPanel({ open, onClose }: { open: boolean; onClose: () => 
                 {section === "github" && (
                   <LinkSection
                     title="GitHub repositories"
+                    description="Public repos only for now. We pull README + source files and index them for search."
                     placeholder="https://github.com/user/repo"
                     fetchList={api.listGithub}
                     add={api.addGithub}
+                    remove={api.deleteGithub}
                     icon={Github}
                   />
                 )}
                 {section === "youtube" && (
                   <LinkSection
                     title="YouTube links"
+                    description="We pull the video's transcript/captions and index it for search."
                     placeholder="https://youtube.com/watch?v=..."
                     fetchList={api.listYoutube}
                     add={api.addYoutube}
+                    remove={api.deleteYoutube}
                     icon={Youtube}
                   />
                 )}
                 {section === "websites" && (
                   <LinkSection
                     title="Website links"
+                    description="We fetch the page and index its readable text (article body, docs, etc.)."
                     placeholder="https://example.com/article"
                     fetchList={api.listWebsite}
                     add={api.addWebsite}
+                    remove={api.deleteWebsite}
                     icon={Globe}
                   />
                 )}
                 {section === "leetcode" && (
                   <LinkSection
                     title="LeetCode profiles"
+                    description="We pull your public stats (solved counts, ranking) and index them for search."
                     placeholder="leetcode-username"
                     fetchList={api.listLeetcode}
                     add={api.addLeetcode}
+                    remove={api.deleteLeetcode}
                     icon={Code2}
                     usernameMode
                   />
@@ -186,7 +194,7 @@ function DocumentsSection() {
         className="mt-4 flex w-full flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-white/15 bg-white/[0.03] py-8 text-white/60 transition-colors hover:bg-white/[0.06]"
       >
         {uploading ? (
-          <Loader2 className="h-5 w-5 animate-spin text-emerald-300" />
+          <Loader2 className="h-5 w-5 animate-spin text-accent" />
         ) : (
           <UploadCloud className="h-5 w-5" />
         )}
@@ -229,16 +237,20 @@ function DocumentsSection() {
 
 function LinkSection({
   title,
+  description,
   placeholder,
   fetchList,
   add,
+  remove,
   icon: Icon,
   usernameMode
 }: {
   title: string;
+  description: string;
   placeholder: string;
   fetchList: () => Promise<LinkItem[]>;
   add: (value: string) => Promise<any>;
+  remove: (id: string) => Promise<any>;
   icon: React.ComponentType<{ className?: string }>;
   usernameMode?: boolean;
 }) {
@@ -246,7 +258,7 @@ function LinkSection({
   const [value, setValue] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [notice, setNotice] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   function refresh() {
     fetchList().then(setItems).catch(() => setItems([]));
@@ -258,9 +270,8 @@ function LinkSection({
     setSubmitting(true);
     setError(null);
     try {
-      const res = await add(value.trim());
+      await add(value.trim());
       setValue("");
-      setNotice(res?.note || null);
       refresh();
     } catch (e: any) {
       setError(e.message || "Could not add");
@@ -269,13 +280,22 @@ function LinkSection({
     }
   }
 
+  async function handleDelete(id: string) {
+    setDeletingId(id);
+    try {
+      await remove(id);
+      setItems((prev) => prev.filter((it) => it.id !== id));
+    } catch {
+      // keep the row if delete failed — user can retry
+    } finally {
+      setDeletingId(null);
+    }
+  }
+
   return (
     <div>
       <h3 className="text-sm font-medium text-white/85">{title}</h3>
-      <p className="mt-1 text-xs text-white/40">
-        Stored against your account. Indexing for this source type needs a
-        backend credential — see note below once added.
-      </p>
+      <p className="mt-1 text-xs text-white/40">{description}</p>
 
       <div className="mt-4 flex items-center gap-2">
         <input
@@ -283,12 +303,12 @@ function LinkSection({
           onChange={(e) => setValue(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && handleAdd()}
           placeholder={placeholder}
-          className="flex-1 rounded-xl border border-white/10 bg-white/[0.04] px-3.5 py-2.5 text-sm text-white placeholder:text-white/30 outline-none focus:border-emerald-400/40"
+          className="flex-1 rounded-xl border border-white/10 bg-white/[0.04] px-3.5 py-2.5 text-sm text-white placeholder:text-white/30 outline-none focus:border-accent/40"
         />
         <button
           onClick={handleAdd}
           disabled={submitting || !value.trim()}
-          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-400/15 text-emerald-300 disabled:opacity-40"
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-accent/15 text-accent disabled:opacity-40"
           aria-label="Add"
         >
           {submitting ? (
@@ -300,7 +320,6 @@ function LinkSection({
       </div>
 
       {error && <p className="mt-2 text-xs text-ember">{error}</p>}
-      {notice && <p className="mt-2 text-xs text-white/35">{notice}</p>}
 
       <div className="mt-4 space-y-2">
         {items.length === 0 && (
@@ -309,17 +328,46 @@ function LinkSection({
         {items.map((it) => (
           <div
             key={it.id}
-            className="flex items-center justify-between rounded-xl border border-white/8 bg-white/[0.03] px-4 py-3"
+            className="flex items-center justify-between gap-3 rounded-xl border border-white/8 bg-white/[0.03] px-4 py-3"
           >
             <div className="flex min-w-0 items-center gap-3">
               <Icon className="h-4 w-4 shrink-0 text-white/50" />
-              <p className="truncate text-sm text-white/85">
-                {usernameMode ? it.username : it.url}
-              </p>
+              <div className="min-w-0">
+                <p className="truncate text-sm text-white/85">
+                  {usernameMode ? it.username : it.url}
+                </p>
+                {it.status === "failed" && it.error && (
+                  <p className="mt-0.5 truncate text-xs text-ember">{it.error}</p>
+                )}
+              </div>
             </div>
-            <span className="shrink-0 rounded-full bg-white/5 px-2.5 py-1 text-[11px] text-white/45">
-              {it.status}
-            </span>
+            <div className="flex shrink-0 items-center gap-2">
+              <span
+                className={`rounded-full px-2.5 py-1 text-[11px] ${
+                  it.status === "ready"
+                    ? "bg-accent/10 text-accent"
+                    : it.status === "failed"
+                    ? "bg-red-500/10 text-red-300"
+                    : "bg-white/5 text-white/45"
+                }`}
+              >
+                {it.status === "processing" ? (
+                  <span className="flex items-center gap-1">
+                    <Loader2 className="h-3 w-3 animate-spin" /> indexing
+                  </span>
+                ) : (
+                  it.status
+                )}
+              </span>
+              <button
+                onClick={() => handleDelete(it.id)}
+                disabled={deletingId === it.id}
+                className="text-white/40 hover:text-ember disabled:opacity-40"
+                aria-label="Remove"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+              </button>
+            </div>
           </div>
         ))}
       </div>

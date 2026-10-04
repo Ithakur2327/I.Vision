@@ -9,8 +9,8 @@ import { Logo } from "@/components/Logo";
 
 type Mode = "login" | "signup";
 
-const ACCENT = "#21F1A8";
-const ACCENT_DIM = "#19D998";
+const ACCENT = "#00EBE1";
+const ACCENT_DIM = "#0BA8A0";
 
 export default function LoginPage() {
   const router = useRouter();
