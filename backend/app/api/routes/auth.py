@@ -1,9 +1,11 @@
+import secrets
 from fastapi import APIRouter, Depends, HTTPException, status, Request
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
 from app.models.models import User, UserSettings
-from app.schemas.schemas import UserCreate, UserLogin, TokenResponse, UserOut
+from app.schemas.schemas import GuestSessionCreate, UserCreate, UserLogin, TokenResponse, UserOut
 from app.core.security import (
     hash_password,
     verify_password,
@@ -13,6 +15,33 @@ from app.core.security import (
 from app.core.limiter import limiter
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
+
+
+@router.post("/guest", response_model=TokenResponse)
+@limiter.limit("10/minute")
+def create_guest_session(
+    request: Request, payload: GuestSessionCreate, db: Session = Depends(get_db)
+):
+    email = f"guest-{payload.session_id}@example.com"
+    user = db.query(User).filter(User.email == email).first()
+    if not user:
+        user = User(
+            email=email,
+            hashed_password=hash_password(secrets.token_urlsafe(32)),
+            full_name="Guest",
+        )
+        db.add(user)
+        try:
+            db.flush()
+            db.add(UserSettings(owner_id=user.id))
+            db.commit()
+        except IntegrityError:
+            db.rollback()
+            user = db.query(User).filter(User.email == email).first()
+            if not user:
+                raise
+
+    return TokenResponse(access_token=create_access_token(user.id))
 
 
 @router.post("/register", response_model=TokenResponse)

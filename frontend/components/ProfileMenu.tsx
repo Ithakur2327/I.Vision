@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
-import { LogOut } from "lucide-react";
+import { LogIn, LogOut, UserPlus } from "lucide-react";
 import { api, clearToken } from "@/lib/api";
 
 export function ProfileMenu({
@@ -34,10 +34,11 @@ export function ProfileMenu({
 
   function handleLogout() {
     clearToken();
-    router.push("/login");
+    window.location.assign("/");
   }
 
   const initial = (profile?.full_name || profile?.email || "?").charAt(0).toUpperCase();
+  const isGuest = !profile || profile.email.startsWith("guest-");
 
   const isRail = variant === "rail";
 
@@ -76,13 +77,32 @@ export function ProfileMenu({
               </p>
             </div>
             <div className="h-px bg-white/10" />
-            <button
-              onClick={handleLogout}
-              className="mt-1 flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm text-red-300 hover:bg-red-500/10"
-            >
-              <LogOut className="h-4 w-4" />
-              Log out
-            </button>
+            {isGuest ? (
+              <>
+                <button
+                  onClick={() => router.push("/login")}
+                  className="mt-1 flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm text-white/80 hover:bg-white/8"
+                >
+                  <LogIn className="h-4 w-4" />
+                  Log in
+                </button>
+                <button
+                  onClick={() => router.push("/login?mode=signup")}
+                  className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm text-white/80 hover:bg-white/8"
+                >
+                  <UserPlus className="h-4 w-4" />
+                  Create account
+                </button>
+              </>
+            ) : (
+              <button
+                onClick={handleLogout}
+                className="mt-1 flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm text-red-300 hover:bg-red-500/10"
+              >
+                <LogOut className="h-4 w-4" />
+                Log out
+              </button>
+            )}
           </motion.div>
         )}
       </AnimatePresence>

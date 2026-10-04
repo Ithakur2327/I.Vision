@@ -1,6 +1,11 @@
 from pydantic import BaseModel, EmailStr
 from typing import Optional, List
 from datetime import datetime
+from uuid import UUID
+
+
+class GuestSessionCreate(BaseModel):
+    session_id: UUID
 
 
 class UserCreate(BaseModel):

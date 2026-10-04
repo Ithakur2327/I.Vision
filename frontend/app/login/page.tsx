@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, FormEvent } from "react";
+import { useEffect, useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight, Loader2, Mail, Lock, Eye, EyeOff, User, ShieldCheck, Sparkles, Zap } from "lucide-react";
+import { ArrowRight, Loader2, Mail, Lock, Eye, EyeOff, User, ShieldCheck, Sparkles, Zap, X } from "lucide-react";
 import { api, setToken } from "@/lib/api";
 import { Logo } from "@/components/Logo";
 
@@ -24,6 +24,12 @@ export default function LoginPage() {
   const [socialNotice, setSocialNotice] = useState(false);
 
   const isSignup = mode === "signup";
+
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get("mode") === "signup") {
+      setMode("signup");
+    }
+  }, []);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -66,38 +72,19 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="relative flex min-h-screen w-full items-stretch overflow-hidden">
-      {/* full-bleed background image */}
-      <div
-        aria-hidden
-        className="absolute inset-0"
-        style={{
-          backgroundImage: "url(/backgrounds/mesh-network.png)",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          backgroundRepeat: "no-repeat"
-        }}
-      />
-      {/* darken + brand-tint overlay so text/card stay legible over the image */}
-      <div
-        aria-hidden
-        className="absolute inset-0"
-        style={{
-          background:
-            "linear-gradient(90deg, rgba(3,5,6,0.55) 0%, rgba(3,5,6,0.72) 45%, rgba(3,5,6,0.88) 100%)"
-        }}
-      />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -right-[10%] top-1/2 h-[900px] w-[900px] -translate-y-1/2 rounded-full"
-        style={{
-          background: `radial-gradient(closest-side, ${ACCENT}18, transparent 70%)`,
-          filter: "blur(280px)"
-        }}
-      />
+    <main className="relative min-h-screen w-full overflow-hidden bg-background">
+      <div aria-hidden className="hero-glow absolute inset-0" />
+      <div aria-hidden className="dot-grid absolute inset-y-0 right-0 w-1/2 opacity-40" />
+      <header className="absolute inset-x-0 top-0 z-10 flex items-center justify-between px-8 py-6 md:px-12">
+        <a href="/" className="text-lg font-semibold text-white">
+          i<span className="text-accent">.</span>vision
+        </a>
+        <a href="/" className="text-sm text-white/80 transition-colors hover:text-white">
+          Back to home
+        </a>
+      </header>
 
-      {/* LEFT — about the assistant */}
-      <div className="relative z-10 hidden w-1/2 flex-col justify-center px-14 lg:flex xl:px-20">
+      <div className="absolute inset-0 z-10 flex flex-col justify-center px-8 pb-16 md:px-12">
         <span
           className="mb-5 inline-flex w-fit items-center gap-2 rounded-full px-3 py-1 text-[12px]"
           style={{
@@ -113,25 +100,34 @@ export default function LoginPage() {
           className="max-w-[520px] text-white"
           style={{ fontWeight: 700, fontSize: 46, lineHeight: 1.08, letterSpacing: "-0.02em" }}
         >
-          Meet <span style={{ color: ACCENT }}>i.vision</span> — the assistant that thinks alongside you
+          Your <span style={{ color: ACCENT }}>AI</span> second brain.
+          <br />
+          Your knowledge. Fully connected.
         </h1>
         <p
           className="mt-5 max-w-[460px]"
           style={{ fontSize: 16, lineHeight: 1.7, color: "rgba(255,255,255,0.6)" }}
         >
-          Ek AI assistant jo aapke kaam, sawaal aur ideas ko samajhta hai — turant jawab,
-          smart research aur seamless workflow, sab ek hi jagah.
+          One place for your work, questions, ideas, and connected knowledge.
         </p>
 
         <div className="mt-9 flex flex-col gap-4">
           <FeaturePoint icon={<Zap size={16} />} title="Instant, context-aware answers" />
           <FeaturePoint icon={<ShieldCheck size={16} />} title="Private and secure by default" />
-          <FeaturePoint icon={<Sparkles size={16} />} title="Built for real, everyday work" />
+          <FeaturePoint icon={<Sparkles size={16} />} title="Your knowledge, fully connected" />
         </div>
       </div>
 
-      {/* RIGHT — the glass login/signup card */}
-      <div className="relative z-10 flex w-full flex-col items-center justify-center px-4 py-6 lg:w-1/2">
+      <div aria-hidden className="absolute inset-0 z-20 bg-black/40 backdrop-blur-md" />
+      <div className="fixed inset-0 z-30 flex w-full flex-col items-center justify-center px-4 py-6">
+        <button
+          type="button"
+          onClick={() => router.push("/")}
+          aria-label="Close sign in"
+          className="absolute right-5 top-5 flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-black/30 text-white/70 transition-colors hover:bg-white/10 hover:text-white"
+        >
+          <X size={18} />
+        </button>
         <div className="relative flex flex-col items-center">
         {/* small circular glass logo, floating 40px above the card */}
         <motion.div

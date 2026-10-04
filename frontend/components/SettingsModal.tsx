@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { X, Mic, Cpu, LogOut, Loader2 } from "lucide-react";
 import { api, clearToken } from "@/lib/api";
@@ -14,7 +13,6 @@ const MODEL_LABELS: Record<string, string> = {
 };
 
 export function SettingsModal({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const router = useRouter();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [settings, setSettings] = useState<Settings | null>(null);
   const [saving, setSaving] = useState(false);
@@ -45,7 +43,7 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
 
   function handleLogout() {
     clearToken();
-    router.push("/login");
+    window.location.assign("/");
   }
 
   const initial = (profile?.full_name || profile?.email || "?").charAt(0).toUpperCase();
@@ -143,13 +141,15 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
 
               {error && <p className="text-xs text-ember">{error}</p>}
 
-              <button
-                onClick={handleLogout}
-                className="flex w-full items-center justify-center gap-2 rounded-xl border border-white/8 px-3 py-2.5 text-sm text-red-300 hover:bg-red-500/10"
-              >
-                <LogOut className="h-4 w-4" />
-                Log out
-              </button>
+              {!profile?.email.startsWith("guest-") && (
+                <button
+                  onClick={handleLogout}
+                  className="flex w-full items-center justify-center gap-2 rounded-xl border border-white/8 px-3 py-2.5 text-sm text-red-300 hover:bg-red-500/10"
+                >
+                  <LogOut className="h-4 w-4" />
+                  Log out
+                </button>
+              )}
             </div>
           </motion.div>
         </>

@@ -110,6 +110,11 @@ export interface TokenResponse {
 }
 
 export const api = {
+  createGuestSession: (sessionId: string): Promise<TokenResponse> =>
+    request("/api/auth/guest", {
+      method: "POST",
+      body: JSON.stringify({ session_id: sessionId })
+    }),
   register: (email: string, password: string, full_name?: string): Promise<TokenResponse> =>
     request("/api/auth/register", {
       method: "POST",
